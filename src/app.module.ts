@@ -6,6 +6,8 @@ import { databaseConfig } from './config/database.config';
 import { brevoConfig } from './config/brevo.config';
 import { jwtConfig } from './config/jwt.config';
 import { appConfig } from './config/app.config';
+import { AuthModule } from './modules/auth/auth.module';
+import { HealthStructuresModule } from './modules/health-structures/health-structures.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { appConfig } from './config/app.config';
       load: [appConfig, jwtConfig, brevoConfig, databaseConfig],
     }),
     PrismaModule,
+    AuthModule,
+    HealthStructuresModule,
   ],
 })
 export class AppModule {}
