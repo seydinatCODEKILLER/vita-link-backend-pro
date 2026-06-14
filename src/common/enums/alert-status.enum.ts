@@ -1,0 +1,6 @@
+export enum AlertStatus {
+  ACTIVE = 'ACTIVE',
+  QUOTA_REACHED = 'QUOTA_REACHED',
+  EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
+}
