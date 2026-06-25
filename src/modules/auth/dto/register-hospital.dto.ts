@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsNumber,
   IsUUID,
-  IsEnum,
   MinLength,
   MaxLength,
   Matches,
@@ -18,6 +17,7 @@ import {
   type SenegalRegion,
 } from '@/common/constants/regions.constant';
 import { StructureType } from '@/generated/prisma/enums';
+import { getEnumValues } from '@/common/utils/validators.utils';
 
 export class RegisterHospitalDto {
   @ApiProperty({ example: 'Dr. Moussa' })
@@ -73,7 +73,7 @@ export class RegisterHospitalDto {
   region!: SenegalRegion;
 
   @ApiProperty({ enum: ['HOSPITAL', 'HEALTH_CENTER'], example: 'HOSPITAL' })
-  @IsEnum(StructureType)
+  @IsIn(getEnumValues(StructureType), { message: 'Type de structure invalide' }) // ✅ Corrigé
   structureType!: StructureType;
 
   @ApiProperty({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })

@@ -2,7 +2,7 @@ import {
   IsString,
   IsEmail,
   IsOptional,
-  IsEnum,
+  IsIn, // ✅ On remplace IsEnum
   IsDateString,
   MinLength,
   MaxLength,
@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BloodType, Gender } from '@/generated/prisma/enums';
+import { getEnumValues } from '@/common/utils/validators.utils'; // ✅ Notre helper
 
 export class RegisterDonorDto {
   @ApiProperty({ example: 'Aliou' })
@@ -37,12 +38,12 @@ export class RegisterDonorDto {
   email?: string;
 
   @ApiPropertyOptional({ enum: BloodType })
-  @IsEnum(BloodType)
+  @IsIn(getEnumValues(BloodType), { message: 'Groupe sanguin invalide' }) // ✅ Corrigé
   @IsOptional()
   bloodType?: BloodType;
 
   @ApiProperty({ enum: Gender })
-  @IsEnum(Gender)
+  @IsIn(getEnumValues(Gender), { message: 'Genre invalide' }) // ✅ Corrigé
   gender!: Gender;
 
   @ApiPropertyOptional({ example: '1995-06-15' })

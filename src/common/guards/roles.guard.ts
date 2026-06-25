@@ -5,10 +5,10 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '../enums/roles.enum';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { JwtPayload } from '../types/jwt-payload.type';
 import { RequestWithUser } from '../types/request-with-user.type';
+import { Role } from '@/generated/prisma/enums';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

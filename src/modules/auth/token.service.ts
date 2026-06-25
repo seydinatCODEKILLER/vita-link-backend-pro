@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthRepository } from './auth.repository';
 import { JwtPayload } from '@/common/types/jwt-payload.type';
-import { Role } from '@/common/enums/roles.enum';
 import { SignOptions } from 'jsonwebtoken';
+import { Role } from '@/generated/prisma/enums';
 
 const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 

@@ -1,8 +1,8 @@
 import { Request } from 'express';
-import { Role } from '../enums/roles.enum';
 import {
   BloodType,
   HealthStructureStatus,
+  Role,
   StructureType,
 } from '@/generated/prisma/enums';
 
@@ -13,10 +13,12 @@ export interface AuthenticatedUser {
   email: string | null;
   role: Role;
   isActive: boolean;
-  bloodType: BloodType;
+  bloodType: BloodType | null;
   avatarUrl: string | null;
   healthStructureId: string | null;
   isStructureAdmin: boolean;
+  latitude: number | null;
+  longitude: number | null;
   employerStructure: {
     id: string;
     name: string;

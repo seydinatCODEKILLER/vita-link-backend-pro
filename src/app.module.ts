@@ -8,6 +8,14 @@ import { jwtConfig } from './config/jwt.config';
 import { appConfig } from './config/app.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthStructuresModule } from './modules/health-structures/health-structures.module';
+import { UsersModule } from './modules/users/users.module';
+import { EventsModule } from './events/events.module';
+import { BloodStocksModule } from './modules/blood-stocks/blood-stocks.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AlertsModule } from './modules/alerts/alerts.module';
+import { AlertResponsesModule } from './modules/alert-responses/alert-responses.module';
+import { JambaarsModule } from './modules/jambaar-profile/jambaar-profile.module';
+import { DonationsModule } from './modules/donations/donations.module';
 
 @Module({
   imports: [
@@ -21,8 +29,16 @@ import { HealthStructuresModule } from './modules/health-structures/health-struc
       load: [appConfig, jwtConfig, brevoConfig, databaseConfig],
     }),
     PrismaModule,
+    EventsModule,
+    NotificationsModule,
+    BloodStocksModule,
     AuthModule,
     HealthStructuresModule,
+    UsersModule,
+    AlertsModule,
+    AlertResponsesModule,
+    JambaarsModule,
+    DonationsModule,
   ],
 })
 export class AppModule {}

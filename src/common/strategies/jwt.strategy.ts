@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.getOrThrow<string>('JWT_SECRET'), // ← getOrThrow au lieu de get
+      secretOrKey: config.getOrThrow<string>('JWT_SECRET'),
     });
   }
 
@@ -30,6 +30,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         isActive: true,
         bloodType: true,
         avatarUrl: true,
+        latitude: true,
+        longitude: true,
         healthStructureId: true,
         isStructureAdmin: true,
         employerStructure: {

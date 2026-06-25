@@ -8,13 +8,13 @@ import {
   Matches,
   Min,
   Max,
+  IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   SENEGAL_REGIONS,
   type SenegalRegion,
 } from '@/common/constants/regions.constant';
-import { IsIn } from 'class-validator';
 
 export class RegisterCntsDto {
   @ApiProperty({ example: 'Dr. Aminata' })
@@ -71,7 +71,6 @@ export class RegisterCntsDto {
   @IsIn(SENEGAL_REGIONS, { message: 'Veuillez sélectionner une région valide' })
   region!: SenegalRegion;
 
-  // Les optionnelles restent avec ? uniquement
   @ApiPropertyOptional({ example: '+221338000001' })
   @IsString()
   @IsOptional()

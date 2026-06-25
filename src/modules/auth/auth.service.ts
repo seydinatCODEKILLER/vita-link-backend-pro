@@ -16,8 +16,8 @@ import { RegisterDonorDto } from './dto/register-donor.dto';
 import { RegisterCntsDto } from './dto/register-cnts.dto';
 import { RegisterHospitalDto } from './dto/register-hospital.dto';
 import { LoginDto } from './dto/login.dto';
-import { Role } from '@/common/enums/roles.enum';
 import { Logger } from '@nestjs/common';
+import { Role } from '@/generated/prisma/enums';
 
 @Injectable()
 export class AuthService {
@@ -96,7 +96,7 @@ export class AuthService {
 
     const tokens = await this.tokenService.issueAndStore({
       id: user.id,
-      role: user.role as Role,
+      role: user.role,
     });
 
     this.logger.log(`OTP vérifié — ${user.id}`);
@@ -182,7 +182,7 @@ export class AuthService {
 
     const tokens = await this.tokenService.issueAndStore({
       id: user.id,
-      role: user.role as Role,
+      role: user.role,
     });
 
     this.logger.log(`LOGIN_SUCCESS — ${user.id} — ${user.role}`);
