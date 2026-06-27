@@ -25,6 +25,7 @@ import { PartnersModule } from './modules/partners/partners.module';
 import { RewardsModule } from './modules/rewards/rewards.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { NotificationsHistoryModule } from './modules/notifications-history/notifications-history.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { NotificationsHistoryModule } from './modules/notifications-history/noti
     RewardsModule,
     CouponsModule,
     NotificationsHistoryModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}
