@@ -19,6 +19,8 @@ const DONOR_SELECT = {
       totalPoints: true,
       currentGrade: true,
       donationCount: true,
+      nextEligibilityAt: true,
+      lastDonationAt: true,
     },
   },
 } as const;
