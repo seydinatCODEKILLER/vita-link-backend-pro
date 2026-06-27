@@ -6,6 +6,6 @@ import { JambaarsRepository } from './jambaar-profile.repository';
 @Module({
   controllers: [JambaarsController],
   providers: [JambaarsService, JambaarsRepository],
-  exports: [JambaarsService],
+  exports: [JambaarsService, JambaarsRepository],
 })
 export class JambaarsModule {}

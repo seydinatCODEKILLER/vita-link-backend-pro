@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/common/base/base.repository';
 import { PrismaService } from '@/prisma/prisma.service';
-import { HealthStructureStatus, StructureType } from '@/generated/prisma/enums';
+import {
+  HealthStructureStatus,
+  StructureType,
+  Role,
+  BloodType,
+  BloodStockLevel,
+} from '@/generated/prisma/enums';
 
 const STRUCTURE_SELECT = {
   id: true,
@@ -180,13 +186,13 @@ export class HealthStructuresRepository extends BaseRepository<
     email: string;
     phone: string;
     passwordHash: string;
-    role: string;
+    role: Role;
     isActive: boolean;
     healthStructureId: string;
     isStructureAdmin: boolean;
   }) {
     return this.prisma.user.create({
-      data: data as Parameters<PrismaService['user']['create']>[0]['data'],
+      data: data,
       select: STAFF_SELECT,
     });
   }
@@ -329,7 +335,7 @@ export class HealthStructuresRepository extends BaseRepository<
           email: data.email,
           phone: data.phone,
           passwordHash: data.passwordHash,
-          role: 'CNTS_ADMIN',
+          role: Role.CNTS_ADMIN,
           isActive: true,
           healthStructureId: structure.id,
           isStructureAdmin: true,
@@ -343,23 +349,14 @@ export class HealthStructuresRepository extends BaseRepository<
         },
       });
 
-      const bloodTypes = [
-        'A_POS',
-        'A_NEG',
-        'B_POS',
-        'B_NEG',
-        'AB_POS',
-        'AB_NEG',
-        'O_POS',
-        'O_NEG',
-      ] as const;
+      const bloodTypes = Object.values(BloodType) as BloodType[];
 
       await tx.bloodStock.createMany({
         data: bloodTypes.map((bloodType) => ({
           healthStructureId: structure.id,
           bloodType,
           quantity: 0,
-          level: 'ADEQUATE' as const,
+          level: BloodStockLevel.ADEQUATE,
         })),
       });
 
@@ -409,7 +406,7 @@ export class HealthStructuresRepository extends BaseRepository<
           email: data.email,
           phone: data.phone,
           passwordHash: data.passwordHash,
-          role: 'HOSPITAL_AGENT',
+          role: Role.HOSPITAL_AGENT,
           isActive: true,
           healthStructureId: structure.id,
           isStructureAdmin: true,

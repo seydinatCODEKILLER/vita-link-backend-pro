@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/common/base/base.repository';
 import { PrismaService } from '@/prisma/prisma.service';
-import { DonorGrade, BloodType } from '@/generated/prisma/enums';
+import {
+  DonorGrade,
+  BloodType,
+  AlertResponseStatus,
+  BloodStockLevel,
+} from '@/generated/prisma/enums';
 import { Prisma } from '@/generated/prisma/client';
 
 const DONATION_SUMMARY_SELECT = {
@@ -162,7 +167,7 @@ export class DonationsRepository extends BaseRepository<
 
       await tx.alertResponse.update({
         where: { id: params.alertResponseId },
-        data: { status: 'ARRIVED', arrivedAt: new Date() },
+        data: { status: AlertResponseStatus.ARRIVED, arrivedAt: new Date() },
       });
 
       const updatedProfile = await tx.jambaarsProfile.upsert({
@@ -205,7 +210,7 @@ export class DonationsRepository extends BaseRepository<
           healthStructureId: params.stockStructureId,
           bloodType: params.bloodType,
           quantity: 1,
-          level: 'ADEQUATE',
+          level: BloodStockLevel.ADEQUATE,
         },
         update: { quantity: { increment: 1 } },
       });

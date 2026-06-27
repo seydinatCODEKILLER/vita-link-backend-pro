@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -683,6 +684,7 @@ model PurchaseOrder {
   expiresAt       DateTime
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
+  cntsNotes       String?
 
   bloodRequest BloodRequest    @relation(fields: [bloodRequestId], references: [id])
   cnts         HealthStructure @relation("CntsPurchaseOrders", fields: [cntsId], references: [id])

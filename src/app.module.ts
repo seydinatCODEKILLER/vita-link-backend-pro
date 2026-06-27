@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaModule } from './prisma/prisma.module';
 import { envValidationSchema } from './config/env.validation';
 import { databaseConfig } from './config/database.config';
@@ -16,6 +17,14 @@ import { AlertsModule } from './modules/alerts/alerts.module';
 import { AlertResponsesModule } from './modules/alert-responses/alert-responses.module';
 import { JambaarsModule } from './modules/jambaar-profile/jambaar-profile.module';
 import { DonationsModule } from './modules/donations/donations.module';
+import { BloodRequestsModule } from './modules/blood-requests/blood-requests.module';
+import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.module';
+import { BadgesModule } from './modules/badges/badges.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { PartnersModule } from './modules/partners/partners.module';
+import { RewardsModule } from './modules/rewards/rewards.module';
+import { CouponsModule } from './modules/coupons/coupons.module';
+import { NotificationsHistoryModule } from './modules/notifications-history/notifications-history.module';
 
 @Module({
   imports: [
@@ -28,17 +37,26 @@ import { DonationsModule } from './modules/donations/donations.module';
       },
       load: [appConfig, jwtConfig, brevoConfig, databaseConfig],
     }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     EventsModule,
     NotificationsModule,
+    CloudinaryModule,
     BloodStocksModule,
     AuthModule,
     HealthStructuresModule,
     UsersModule,
+    BloodRequestsModule,
     AlertsModule,
+    PurchaseOrdersModule,
     AlertResponsesModule,
     JambaarsModule,
     DonationsModule,
+    BadgesModule,
+    PartnersModule,
+    RewardsModule,
+    CouponsModule,
+    NotificationsHistoryModule,
   ],
 })
 export class AppModule {}

@@ -4,6 +4,7 @@ import { EventsService } from '@/events/events.service';
 import { PushService } from '@/modules/notifications/push.service';
 import { LeaderboardDto } from './dto/leaderboard.dto';
 import { GRADE_THRESHOLDS } from '@/common/utils/points.utils';
+import { DonorGrade } from '@/generated/prisma/enums';
 
 @Injectable()
 export class JambaarsService {
@@ -154,8 +155,8 @@ export class JambaarsService {
   }
 
   private _calculateProgression(totalPoints: number, currentGrade: string) {
-    const order = ['ASPIRANT', 'SENTINELLE', 'AMBASSADEUR'];
-    const idx = order.indexOf(currentGrade);
+    const order = Object.keys(GRADE_THRESHOLDS) as DonorGrade[];
+    const idx = order.indexOf(currentGrade as DonorGrade);
     const nextGrade = order[idx + 1] ?? null;
 
     if (!nextGrade) {
@@ -169,8 +170,7 @@ export class JambaarsService {
 
     const currentMin =
       GRADE_THRESHOLDS[currentGrade as keyof typeof GRADE_THRESHOLDS];
-    const nextMin =
-      GRADE_THRESHOLDS[nextGrade as keyof typeof GRADE_THRESHOLDS];
+    const nextMin = GRADE_THRESHOLDS[nextGrade];
     const progressPercent = Math.min(
       Math.round(((totalPoints - currentMin) / (nextMin - currentMin)) * 100),
       100,

@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { CloudinaryService } from './cloudinary.service';
+import { CloudinaryService } from '../../cloudinary/cloudinary.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
