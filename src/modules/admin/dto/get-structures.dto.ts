@@ -1,7 +1,8 @@
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsOptional, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { HealthStructureStatus, StructureType } from '@/generated/prisma/enums';
+import { getEnumValues } from '@/common/utils/validators.utils';
 
 const SENEGAL_REGIONS = [
   'Dakar',
@@ -24,7 +25,7 @@ export type SenegalRegion = (typeof SENEGAL_REGIONS)[number];
 
 export class GetStructuresDto {
   @ApiPropertyOptional({ enum: HealthStructureStatus })
-  @IsEnum(HealthStructureStatus)
+  @IsIn(getEnumValues(HealthStructureStatus), { message: 'Statut invalide' })
   @IsOptional()
   status?: HealthStructureStatus;
 
@@ -32,7 +33,7 @@ export class GetStructuresDto {
     enum: StructureType,
     description: 'Filtrer par type de structure',
   })
-  @IsEnum(StructureType)
+  @IsIn(getEnumValues(StructureType), { message: 'Type de structure invalide' })
   @IsOptional()
   structureType?: StructureType;
 

@@ -1,16 +1,17 @@
-import { IsEnum, IsInt, IsOptional, IsString, Min, Max } from 'class-validator';
+import { IsInt, IsOptional, IsString, Min, Max, IsIn } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Role, BloodType } from '@/generated/prisma/enums';
+import { getEnumValues } from '@/common/utils/validators.utils';
 
 export class GetUsersDto {
   @ApiPropertyOptional({ enum: Role })
-  @IsEnum(Role)
+  @IsIn(getEnumValues(Role), { message: 'Rôle invalide' })
   @IsOptional()
   role?: Role;
 
   @ApiPropertyOptional({ enum: BloodType })
-  @IsEnum(BloodType)
+  @IsIn(getEnumValues(BloodType), { message: 'Groupe sanguin invalide' })
   @IsOptional()
   bloodType?: BloodType;
 
