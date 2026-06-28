@@ -10,14 +10,13 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { memoryStorage } from 'multer';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { UpdateExpoTokenDto } from './dto/update-expo-token.dto';
+import { avatarInterceptor } from './avatar.interceptor';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -64,23 +63,7 @@ export class UsersController {
 
   @Patch('me/avatar')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 },
-      fileFilter: (_req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-        if (allowed.includes(file.mimetype)) {
-          cb(null, true);
-        } else {
-          cb(
-            new Error('Format non supporté. Utilisez JPEG, PNG ou WEBP.'),
-            false,
-          );
-        }
-      },
-    }),
-  )
+  @UseInterceptors(avatarInterceptor)
   @ApiUpdateAvatar()
   updateAvatar(
     @CurrentUser() user: AuthenticatedUser,

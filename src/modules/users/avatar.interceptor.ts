@@ -1,5 +1,5 @@
 import { createImageUploadInterceptor } from '@/common/interceptors/image-upload.interceptor';
 
-export const logoInterceptor = createImageUploadInterceptor({
-  fieldName: 'logo',
+export const avatarInterceptor = createImageUploadInterceptor({
+  fieldName: 'avatar',
 });
