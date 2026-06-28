@@ -7,7 +7,7 @@ import { globalValidationPipe } from './common/pipes/validation.pipe';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   app.use(helmet());
@@ -21,7 +21,6 @@ async function bootstrap() {
     new ResponseInterceptor(),
   );
 
-  // Swagger
   const config = new DocumentBuilder()
     .setTitle('Vita-Link API')
     .setDescription('API de gestion des dons de sang')
@@ -39,4 +38,7 @@ async function bootstrap() {
   console.log(`📚 Swagger disponible sur http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+bootstrap().catch((err: unknown) => {
+  console.error('Échec du démarrage de l’application :', err);
+  process.exit(1);
+});
