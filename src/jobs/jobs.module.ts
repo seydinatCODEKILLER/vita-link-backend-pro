@@ -14,9 +14,6 @@ import { TokenExpireJob } from './token-expire.job';
     LeaderboardJob,
     PurchaseOrderExpiryJob,
     TokenExpireJob,
-    // EligibilityDonateJob non migré : confirmé non utilisé actuellement
-    // dans le projet (cf. discussion de migration). À ajouter si un usage
-    // futur le justifie.
   ],
 })
 export class JobsModule {}

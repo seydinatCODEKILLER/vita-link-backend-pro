@@ -14,16 +14,9 @@ export class EligibilityJob {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  // Tous les dimanches à 04h00 — recalcule les éligibilités (en cas de
-  // modifications manuelles ayant désynchronisé nextEligibilityAt)
   @Cron('0 4 * * 0')
   async run(): Promise<void> {
     try {
-      // Une seule requête avec `include` au lieu d'une requête
-      // prisma.user.findUnique par profil dans une boucle (N+1 query) —
-      // le code Express d'origine faisait une requête séparée par
-      // donneur, ce qui aurait pu devenir très lent avec une base de
-      // donneurs importante.
       const profiles = await this.prisma.jambaarsProfile.findMany({
         where: { lastDonationAt: { not: null } },
         select: {

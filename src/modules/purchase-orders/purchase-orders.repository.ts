@@ -165,7 +165,7 @@ export class PurchaseOrdersRepository extends BaseRepository<
         });
       }
 
-      return order as PurchaseOrderDetail;
+      return order;
     });
   }
 }
