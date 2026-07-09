@@ -3,7 +3,8 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createTestApp } from './utils/test-app';
 import { cleanDatabase } from './utils/db-helper';
-import { seedCntsDirector } from './utils/seed-helper';
+// test/auth.e2e-spec.ts
+import { seedCntsDirector } from './seeders';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Express } from 'express';
 

@@ -299,7 +299,7 @@ describe('BloodRequestsService', () => {
         radiusKm: 10,
       };
 
-      it('traite partiellement et émet blood_request:partial', async () => {
+      it('traite partiellement et émet les deux événements dans le bon ordre', async () => {
         repository.findRequestById
           .mockResolvedValueOnce(BLOOD_REQUEST)
           .mockResolvedValueOnce({
@@ -315,13 +315,24 @@ describe('BloodRequestsService', () => {
         );
 
         expect(repository.decrementStock).toHaveBeenCalledWith('stock-1', 1);
-        expect(emitter.emitAsync).toHaveBeenCalledWith(
-          'blood_request.handled',
+        expect(emitter.emitAsync).toHaveBeenNthCalledWith(
+          1,
+          'blood_request.partially_fulfilled',
           expect.objectContaining({
             action: 'PARTIALLY_FULFILL',
             requestId: 'request-1',
           }),
         );
+        expect(emitter.emitAsync).toHaveBeenNthCalledWith(
+          2,
+          'blood_request.escalation_needed',
+          expect.objectContaining({
+            action: 'PARTIALLY_FULFILL',
+            requestId: 'request-1',
+          }),
+        );
+        expect(emitter.emitAsync).toHaveBeenCalledTimes(2);
+
         expect(events.emitToStructure).toHaveBeenCalledWith(
           'hospital-1',
           'blood_request:partial',
@@ -339,6 +350,9 @@ describe('BloodRequestsService', () => {
         await expect(
           service.handleRequest('request-1', dto, CNTS_AGENT),
         ).rejects.toThrow(BadRequestException);
+
+        // Aucun événement ne doit être émis si la validation échoue avant
+        expect(emitter.emitAsync).not.toHaveBeenCalled();
       });
     });
 
@@ -348,7 +362,7 @@ describe('BloodRequestsService', () => {
         radiusKm: 10,
       };
 
-      it('escalade la demande et émet blood_request:escalated', async () => {
+      it('escalade la demande et émet uniquement blood_request.escalation_needed', async () => {
         repository.findRequestById
           .mockResolvedValueOnce(BLOOD_REQUEST)
           .mockResolvedValueOnce({
@@ -362,13 +376,15 @@ describe('BloodRequestsService', () => {
           CNTS_AGENT,
         );
 
+        expect(emitter.emitAsync).toHaveBeenCalledTimes(1);
         expect(emitter.emitAsync).toHaveBeenCalledWith(
-          'blood_request.handled',
+          'blood_request.escalation_needed',
           expect.objectContaining({
             action: 'ESCALATE',
             requestId: 'request-1',
           }),
         );
+
         expect(events.emitToStructure).toHaveBeenCalledWith(
           'hospital-1',
           'blood_request:escalated',

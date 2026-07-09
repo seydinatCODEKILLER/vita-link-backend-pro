@@ -296,31 +296,32 @@ export class BloodRequestsService {
       cntsNotes: dto.cntsNotes ?? null,
     });
 
-    // emitAsync (pas emit) : on ATTEND que le listener ait créé l'alerte et
-    // posé `escalatedAlertId` en base avant de répondre au client. Sans
-    // cela, la réponse HTTP renverrait un statut PARTIALLY_FULFILLED sans
-    // escalatedAlertId, qui n'arriverait qu'après coup — incohérent avec
-    // le comportement Express d'origine, qui était synchrone à cet endroit.
-    await this.emitter.emitAsync(
-      'blood_request.handled',
-      new BloodRequestHandledEvent(
-        'PARTIALLY_FULFILL',
-        requestId,
-        user.healthStructureId!,
-        request!.requestingHospital.id,
-        request!.bloodType,
-        request!.urgencyLevel,
-        request!.serviceUnit,
-        request!.quantityNeeded,
-        qty,
-        dto.radiusKm ?? 10,
-        this._buildAgentUser(user),
-      ),
+    const event = new BloodRequestHandledEvent(
+      'PARTIALLY_FULFILL',
+      requestId,
+      user.healthStructureId!,
+      request!.requestingHospital.id,
+      request!.bloodType,
+      request!.urgencyLevel,
+      request!.serviceUnit,
+      request!.quantityNeeded,
+      qty,
+      dto.radiusKm ?? 10,
+      this._buildAgentUser(user),
     );
 
-    // On relit l'état final (escalatedAlertId inclus) plutôt que de se fier
-    // au retour de emitAsync, pour garantir que la réponse HTTP reflète
-    // exactement ce qui est en base, quel que soit le nombre de listeners.
+    // 1) D'abord le bon de commande (module purchase-orders) — écrit
+    // uniquement dans purchase_orders. emitAsync garantit que ce listener
+    // est terminé avant de passer à l'étape suivante.
+    await this.emitter.emitAsync('blood_request.partially_fulfilled', event);
+
+    // 2) PUIS l'alerte pour le reliquat (module alerts) — ne démarre
+    // qu'une fois le bon de commande créé. Les deux écritures sur
+    // blood_requests sont donc désormais séquentielles, plus concurrentes
+    // : c'est ce qui éliminait le deadlock Postgres (40P01) observé quand
+    // les deux listeners partageaient le même événement 'blood_request.handled'.
+    await this.emitter.emitAsync('blood_request.escalation_needed', event);
+
     const partial = await this.repository.findRequestById(requestId);
 
     this.events.emitToStructure(
@@ -348,10 +349,10 @@ export class BloodRequestsService {
       cntsNotes: dto.cntsNotes ?? null,
     });
 
-    // emitAsync pour la même raison que _handlePartialFulfill : on attend
-    // que escalatedAlertId soit posé avant de répondre.
+    // Aucun bon de commande dans ce cas (rien n'a été fourni) — un seul
+    // événement, pour le module alerts uniquement.
     await this.emitter.emitAsync(
-      'blood_request.handled',
+      'blood_request.escalation_needed',
       new BloodRequestHandledEvent(
         'ESCALATE',
         requestId,

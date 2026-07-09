@@ -9,7 +9,7 @@ export class BloodRequestFulfilledListener {
 
   constructor(private readonly purchaseOrdersService: PurchaseOrdersService) {}
 
-  @OnEvent('blood_request.fulfilled', { async: true })
+  @OnEvent('blood_request.fulfilled')
   async handle(event: BloodRequestHandledEvent): Promise<void> {
     try {
       await this.purchaseOrdersService.createForRequest({
@@ -27,10 +27,8 @@ export class BloodRequestFulfilledListener {
     }
   }
 
-  @OnEvent('blood_request.handled', { async: true })
+  @OnEvent('blood_request.partially_fulfilled')
   async handlePartial(event: BloodRequestHandledEvent): Promise<void> {
-    if (event.action !== 'PARTIALLY_FULFILL') return;
-
     try {
       await this.purchaseOrdersService.createForRequest({
         bloodRequestId: event.requestId,

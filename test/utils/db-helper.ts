@@ -1,3 +1,4 @@
+// test/utils/db-helper.ts
 import { PrismaService } from '@/prisma/prisma.service';
 
 const TABLE_NAMES = [
@@ -22,6 +23,8 @@ const TABLE_NAMES = [
   'users',
 ];
 
+const POSTGRES_DEADLOCK_CODE = '40P01';
+
 export async function cleanDatabase(prisma: PrismaService): Promise<void> {
   const dbUrl = process.env.DATABASE_URL ?? '';
 
@@ -31,7 +34,28 @@ export async function cleanDatabase(prisma: PrismaService): Promise<void> {
     );
   }
 
-  await prisma.$executeRawUnsafe(
-    `TRUNCATE TABLE ${TABLE_NAMES.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE;`,
-  );
+  const truncateSql = `TRUNCATE TABLE ${TABLE_NAMES.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE;`;
+
+  // Un TRUNCATE peut entrer en deadlock avec une transaction encore en
+  // cours issue d'un listener asynchrone du test précédent (ex: écritures
+  // concurrentes sur blood_requests via des @OnEvent parallèles côté app).
+  // On retente quelques fois avant d'abandonner, plutôt que de faire
+  // échouer tout le test suivant à cause d'un résidu du précédent.
+  const MAX_ATTEMPTS = 3;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await prisma.$executeRawUnsafe(truncateSql);
+      return;
+    } catch (err) {
+      const isDeadlock =
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        (err as { code?: string }).code === POSTGRES_DEADLOCK_CODE;
+
+      if (!isDeadlock || attempt === MAX_ATTEMPTS) throw err;
+
+      await new Promise((resolve) => setTimeout(resolve, 100 * attempt));
+    }
+  }
 }

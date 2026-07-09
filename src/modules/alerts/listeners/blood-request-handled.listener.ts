@@ -14,12 +14,8 @@ export class BloodRequestHandledListener {
     private readonly bloodRequestsRepository: BloodRequestsRepository,
   ) {}
 
-  @OnEvent('blood_request.handled', { async: true })
-  async handleEscalation(event: BloodRequestHandledEvent): Promise<void> {
-    if (event.action !== 'PARTIALLY_FULFILL' && event.action !== 'ESCALATE') {
-      return;
-    }
-
+  @OnEvent('blood_request.escalation_needed')
+  async handle(event: BloodRequestHandledEvent): Promise<void> {
     const quantityForAlert =
       event.action === 'ESCALATE'
         ? event.quantityNeeded
@@ -56,12 +52,5 @@ export class BloodRequestHandledListener {
         err,
       );
     }
-  }
-
-  @OnEvent('blood_request.fulfilled', { async: true })
-  handleFulfill(event: BloodRequestHandledEvent): void {
-    this.logger.log(
-      `BLOOD_REQUEST_FULFILLED_EVENT — requestId: ${event.requestId}`,
-    );
   }
 }
