@@ -249,6 +249,22 @@ export class AlertsRepository extends BaseRepository<PrismaService['alert']> {
     });
   }
 
+  findAlertWithStructure(alertId: string) {
+    return this.model.findUnique({
+      where: { id: alertId },
+      select: {
+        id: true,
+        healthStructure: {
+          select: {
+            id: true,
+            structureType: true,
+            affiliatedCntsId: true,
+          },
+        },
+      },
+    });
+  }
+
   async incrementConfirmed(alertId: string) {
     return this.prisma.$transaction(async (tx) => {
       const alert = await tx.alert.update({

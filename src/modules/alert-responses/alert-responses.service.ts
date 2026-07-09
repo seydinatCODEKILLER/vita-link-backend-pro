@@ -194,16 +194,15 @@ export class AlertResponsesService {
       await this.alertsService.decrementConfirmedCount(alertId);
 
     if (updatedAlert.status === AlertStatus.ACTIVE) {
-      this.events.emitToStructure(
-        updatedAlert.healthStructureId,
-        'alert:reactivated',
-        {
-          alertId: updatedAlert.id,
-          quantityConfirmed: updatedAlert.quantityConfirmed,
-          quantityNeeded: updatedAlert.quantityNeeded,
-          message: "Un donneur ne s'est pas présenté — l'alerte est réactivée",
-        },
-      );
+      const targetStructureId =
+        await this.alertsService.getNotificationTargetStructureId(alertId);
+
+      this.events.emitToStructure(targetStructureId, 'alert:reactivated', {
+        alertId: updatedAlert.id,
+        quantityConfirmed: updatedAlert.quantityConfirmed,
+        quantityNeeded: updatedAlert.quantityNeeded,
+        message: "Un donneur ne s'est pas présenté — l'alerte est réactivée",
+      });
     }
 
     this.logger.log(
@@ -243,11 +242,23 @@ export class AlertResponsesService {
       isReopened,
     });
 
+    if (isReopened) {
+      const targetStructureId =
+        await this.alertsService.getNotificationTargetStructureId(alertId);
+
+      this.events.emitToStructure(targetStructureId, 'alert:reactivated', {
+        alertId,
+        message: "Une confirmation a été annulée — l'alerte est réactivée",
+      });
+    }
+
     this.logger.log(
       `DONOR_CANCELLED — alertId: ${alertId} — donorId: ${donorId} — réouvert: ${isReopened}`,
     );
 
-    return { message: "Votre venue a été annulée. L'hôpital a été prévenu." };
+    return {
+      message: 'Votre venue a été annulée. La structure a été prévenu.',
+    };
   }
 
   async checkActiveConfirmation(donorId: string) {

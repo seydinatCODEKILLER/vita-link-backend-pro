@@ -175,19 +175,28 @@ export class AlertsService {
       return;
     }
 
-    this.events.emitToStructure(
-      structure.affiliatedCntsId,
-      'alert:escalation',
-      {
-        alertId: alert.id,
-        bloodType: alert.bloodType,
-        urgencyLevel: alert.urgencyLevel,
-        quantityNeeded: alert.quantityNeeded,
-        hospitalName: structure.name,
-        hospitalId: structure.id,
-        message: `${structure.name} vient de lancer une alerte ${dto.urgencyLevel === 'VITAL' ? 'VITALE' : 'standard'}`,
-      },
-    );
+    const targetStructureId = this.getSupervisingStructureId(structure);
+
+    this.events.emitToStructure(targetStructureId, 'alert:escalation', {
+      alertId: alert.id,
+      bloodType: alert.bloodType,
+      urgencyLevel: alert.urgencyLevel,
+      quantityNeeded: alert.quantityNeeded,
+      hospitalName: structure.name,
+      hospitalId: structure.id,
+      message: `${structure.name} vient de lancer une alerte ${dto.urgencyLevel === 'VITAL' ? 'VITALE' : 'standard'}`,
+    });
+  }
+
+  private getSupervisingStructureId(structure: {
+    id: string;
+    structureType: StructureType;
+    affiliatedCntsId: string | null;
+  }): string {
+    return structure.structureType === StructureType.HOSPITAL &&
+      structure.affiliatedCntsId
+      ? structure.affiliatedCntsId
+      : structure.id;
   }
 
   // ── Méthodes publiques ─────────────────────────────────────
@@ -283,6 +292,14 @@ export class AlertsService {
     };
 
     return { alert, responses, summary };
+  }
+
+  async getNotificationTargetStructureId(alertId: string): Promise<string> {
+    const alert = await this.repository.findAlertWithStructure(alertId);
+    if (!alert) {
+      throw new NotFoundException('Alerte introuvable');
+    }
+    return this.getSupervisingStructureId(alert.healthStructure);
   }
 
   async closeAlert(alertId: string, user: AuthenticatedUser) {

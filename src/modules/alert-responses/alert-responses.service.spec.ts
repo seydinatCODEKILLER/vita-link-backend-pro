@@ -23,6 +23,7 @@ const createMockRepository = () => ({
 
 const createMockAlertsService = () => ({
   decrementConfirmedCount: jest.fn(),
+  getNotificationTargetStructureId: jest.fn(),
 });
 
 const createMockEventsService = () => ({
@@ -268,13 +269,17 @@ describe('AlertResponsesService', () => {
         ...ALERT_RESPONSE,
         status: AlertResponseStatus.NO_SHOW,
       });
+
       alertsService.decrementConfirmedCount.mockResolvedValue({
         id: 'alert-1',
         quantityNeeded: 2,
         quantityConfirmed: 0,
         status: AlertStatus.ACTIVE,
-        healthStructureId: 'structure-1',
       });
+
+      alertsService.getNotificationTargetStructureId.mockResolvedValue(
+        'structure-1',
+      );
     });
 
     it("signale l'absence et émet alert:reactivated si quota non atteint", async () => {
@@ -287,6 +292,11 @@ describe('AlertResponsesService', () => {
       expect(alertsService.decrementConfirmedCount).toHaveBeenCalledWith(
         'alert-1',
       );
+
+      expect(
+        alertsService.getNotificationTargetStructureId,
+      ).toHaveBeenCalledWith('alert-1');
+
       expect(events.emitToStructure).toHaveBeenCalledWith(
         'structure-1',
         'alert:reactivated',
@@ -301,11 +311,13 @@ describe('AlertResponsesService', () => {
         quantityNeeded: 2,
         quantityConfirmed: 2,
         status: AlertStatus.QUOTA_REACHED,
-        healthStructureId: 'structure-1',
       });
 
       await service.markNoShow('alert-1', 'donor-1');
 
+      expect(
+        alertsService.getNotificationTargetStructureId,
+      ).not.toHaveBeenCalled();
       expect(events.emitToStructure).not.toHaveBeenCalled();
     });
 
@@ -338,6 +350,10 @@ describe('AlertResponsesService', () => {
       });
       repository.decrementAlertConfirmed.mockResolvedValue({});
       repository.reopenAlertIfNecessary.mockResolvedValue(false);
+
+      alertsService.getNotificationTargetStructureId.mockResolvedValue(
+        'cnts-structure-1',
+      );
     });
 
     it('annule la confirmation et émet response:cancelled', async () => {
@@ -351,6 +367,9 @@ describe('AlertResponsesService', () => {
         'alert-1',
       );
       expect(repository.reopenAlertIfNecessary).toHaveBeenCalledWith('alert-1');
+
+      expect(events.emitToStructure).not.toHaveBeenCalled();
+
       expect(events.emitToAlert).toHaveBeenCalledWith(
         'alert-1',
         'response:cancelled',
@@ -363,10 +382,20 @@ describe('AlertResponsesService', () => {
       expect(result.message).toBeDefined();
     });
 
-    it("émet isReopened: true si l'alerte est réouverte", async () => {
+    it("émet isReopened: true et notifie la structure cible si l'alerte est réouverte", async () => {
       repository.reopenAlertIfNecessary.mockResolvedValue(true);
 
       await service.cancelConfirmation('alert-1', 'donor-1');
+
+      expect(
+        alertsService.getNotificationTargetStructureId,
+      ).toHaveBeenCalledWith('alert-1');
+
+      expect(events.emitToStructure).toHaveBeenCalledWith(
+        'cnts-structure-1',
+        'alert:reactivated',
+        expect.objectContaining({ alertId: 'alert-1' }),
+      );
 
       expect(events.emitToAlert).toHaveBeenCalledWith(
         'alert-1',
