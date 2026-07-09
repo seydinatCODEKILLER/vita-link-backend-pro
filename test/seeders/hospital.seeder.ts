@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { Express } from 'express';
+import { PrismaService } from '@/prisma/prisma.service';
 
 export interface SeedHospitalOptions {
   email?: string;
@@ -8,13 +9,9 @@ export interface SeedHospitalOptions {
   password?: string;
   structureName?: string;
   registrationNumber?: string;
-  affiliatedCntsId: string; // obligatoire : un hôpital doit être affilié
+  affiliatedCntsId: string;
 }
 
-/**
- * Inscrit un hôpital affilié à une CNTS existante + son directeur,
- * connecte ce directeur.
- */
 export async function seedHospitalAgent(
   app: INestApplication,
   opts: SeedHospitalOptions,
@@ -54,4 +51,24 @@ export async function seedHospitalAgent(
     user: loginRes.body.user,
     structureId: registerRes.body.structure.id as string,
   };
+}
+
+/**
+ * Comme seedHospitalAgent, mais marque en plus la structure comme
+ * vérifiée. Requis pour tout scénario qui déclenche
+ * AlertsService.createAlert (validateStructure exige isVerified: true).
+ */
+export async function seedVerifiedHospitalAgent(
+  app: INestApplication,
+  prisma: PrismaService,
+  opts: SeedHospitalOptions,
+) {
+  const result = await seedHospitalAgent(app, opts);
+
+  await prisma.healthStructure.update({
+    where: { id: result.structureId },
+    data: { isVerified: true },
+  });
+
+  return result;
 }

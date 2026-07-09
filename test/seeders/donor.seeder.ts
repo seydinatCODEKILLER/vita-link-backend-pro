@@ -10,14 +10,11 @@ export interface SeedDonorOptions {
   lastName?: string;
   bloodType?: string;
   gender?: 'MALE' | 'FEMALE';
+  latitude?: number;
+  longitude?: number;
+  expoPushToken?: string | null;
 }
 
-/**
- * Inscrit un donneur via /auth/register/donor + /auth/otp/verify.
- * Passe par les vrais endpoints (pas d'insertion Prisma directe) pour
- * garder le pipeline d'inscription/OTP honnête dans les tests d'autres
- * modules qui dépendent d'un donneur déjà authentifié.
- */
 export async function seedVerifiedDonor(
   app: INestApplication,
   prisma: PrismaService,
@@ -25,7 +22,7 @@ export async function seedVerifiedDonor(
 ) {
   const phone =
     opts.phone ?? `+2217${Math.floor(10000000 + Math.random() * 89999999)}`;
-  const email = opts.email ?? `donor-${Date.now()}@test.sn`;
+  const email = opts.email ?? `donor-${Date.now()}-${Math.random()}@test.sn`;
 
   await request(app.getHttpServer() as Express)
     .post('/auth/register/donor')
@@ -49,9 +46,28 @@ export async function seedVerifiedDonor(
     .send({ email, code: otp!.code })
     .expect(200);
 
+  const donor = res.body.user;
+
+  if (
+    opts.latitude !== undefined ||
+    opts.longitude !== undefined ||
+    opts.expoPushToken !== undefined
+  ) {
+    await prisma.user.update({
+      where: { id: donor.id },
+      data: {
+        ...(opts.latitude !== undefined && { latitude: opts.latitude }),
+        ...(opts.longitude !== undefined && { longitude: opts.longitude }),
+        ...(opts.expoPushToken !== undefined && {
+          expoPushToken: opts.expoPushToken,
+        }),
+      },
+    });
+  }
+
   return {
     accessToken: res.body.accessToken as string,
     refreshToken: res.body.refreshToken as string,
-    user: res.body.user,
+    user: donor,
   };
 }
