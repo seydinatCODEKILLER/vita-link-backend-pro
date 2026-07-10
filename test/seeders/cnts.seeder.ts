@@ -3,7 +3,6 @@ import request from 'supertest';
 import { Express } from 'express';
 import { PrismaService } from '@/prisma/prisma.service';
 
-// Coordonnées Dakar par défaut, nécessaires pour AlertsService.resolveCoordinates
 export const DEFAULT_LAT = 14.6928;
 export const DEFAULT_LNG = -17.4467;
 
