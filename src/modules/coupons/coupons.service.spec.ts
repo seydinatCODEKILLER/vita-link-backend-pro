@@ -62,8 +62,8 @@ const COUPON_SUMMARY = {
   code: 'JAMBAAR-X9K2-M4P7',
   status: CouponStatus.ACTIVE,
   usedAt: null,
-  expiresAt: new Date('2026-07-25'),
-  createdAt: new Date('2026-06-25'),
+  expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+  createdAt: new Date(),
   reward: {
     id: 'reward-1',
     title: 'Ticket de bus gratuit',
