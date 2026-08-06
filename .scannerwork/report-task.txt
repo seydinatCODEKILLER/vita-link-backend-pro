@@ -2,5 +2,5 @@ projectKey=project-nest
 serverUrl=http://localhost:9000
 serverVersion=26.7.0.124771
 dashboardUrl=http://localhost:9000/dashboard?id=project-nest
-ceTaskId=a6188d63-273b-4250-9cdf-df00334d1c46
-ceTaskUrl=http://localhost:9000/api/ce/task?id=a6188d63-273b-4250-9cdf-df00334d1c46
+ceTaskId=4a38c396-49c7-4567-a1b0-66eb88ca1b21
+ceTaskUrl=http://localhost:9000/api/ce/task?id=4a38c396-49c7-4567-a1b0-66eb88ca1b21
